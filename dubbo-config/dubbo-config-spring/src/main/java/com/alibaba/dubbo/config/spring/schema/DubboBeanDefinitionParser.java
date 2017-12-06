@@ -73,6 +73,13 @@ public class DubboBeanDefinitionParser implements BeanDefinitionParser {
         this.required = required;
     }
 
+    /**
+     * BeanDefinitionParser被注册到NamespaceHandler后，Spring会自动来调用
+     * 这里的parse来解析schema
+     * @param element
+     * @param parserContext
+     * @return
+     */
     public BeanDefinition parse(Element element, ParserContext parserContext) {
         return parse(element, parserContext, beanClass, required);
     }

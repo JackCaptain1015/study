@@ -192,6 +192,7 @@ public class ExtensionLoader<T> {
      */
     public List<T> getActivateExtension(URL url, String[] values, String group) {
         List<T> exts = new ArrayList<T>();
+        //SPI实现类的名字
         List<String> names = values == null ? new ArrayList<String>(0) : Arrays.asList(values);
         if (! names.contains(Constants.REMOVE_VALUE_PREFIX + Constants.DEFAULT_KEY)) {
             getExtensionClasses();
@@ -301,7 +302,7 @@ public class ExtensionLoader<T> {
      */
 	@SuppressWarnings("unchecked")
 	public T getExtension(String name) {
-		if (name == null || name.length() == 0)
+        if (name == null || name.length() == 0)
 		    throw new IllegalArgumentException("Extension name == null");
 		if ("true".equals(name)) {
 		    return getDefaultExtension();
@@ -452,6 +453,7 @@ public class ExtensionLoader<T> {
                     instance = cachedAdaptiveInstance.get();
                     if (instance == null) {
                         try {
+                            //创建动态扩展实例
                             instance = createAdaptiveExtension();
                             cachedAdaptiveInstance.set(instance);
                         } catch (Throwable t) {
@@ -494,6 +496,9 @@ public class ExtensionLoader<T> {
         return new IllegalStateException(buf.toString());
     }
 
+    /**
+     * 这里返回的是一个wrapper的包装类
+     */
     @SuppressWarnings("unchecked")
     private T createExtension(String name) {
         Class<?> clazz = getExtensionClasses().get(name);
@@ -510,6 +515,11 @@ public class ExtensionLoader<T> {
             Set<Class<?>> wrapperClasses = cachedWrapperClasses;
             if (wrapperClasses != null && wrapperClasses.size() > 0) {
                 for (Class<?> wrapperClass : wrapperClasses) {
+                    /**
+                     *获取到wrapper的构造函数，并把clazz实例对象注入该构造函数中，得到一个wrapper对象。
+                     * 然后使用injectExtension()方法为该对象中的set方法设置属性。
+                     */
+
                     instance = injectExtension((T) wrapperClass.getConstructor(type).newInstance(instance));
                 }
             }
@@ -564,6 +574,7 @@ public class ExtensionLoader<T> {
             synchronized (cachedClasses) {
                 classes = cachedClasses.get();
                 if (classes == null) {
+                    //这里得到classes，即所有在该目录下的SPI接口
                     classes = loadExtensionClasses();
                     cachedClasses.set(classes);
                 }
@@ -574,8 +585,10 @@ public class ExtensionLoader<T> {
 
     // 此方法已经getExtensionClasses方法同步过。
     private Map<String, Class<?>> loadExtensionClasses() {
+        //获取到SPI注解接口
         final SPI defaultAnnotation = type.getAnnotation(SPI.class);
         if(defaultAnnotation != null) {
+            //SPI中注解的value默认为""
             String value = defaultAnnotation.value();
             if(value != null && (value = value.trim()).length() > 0) {
                 String[] names = NAME_SEPARATOR.split(value);
@@ -586,14 +599,22 @@ public class ExtensionLoader<T> {
                 if(names.length == 1) cachedDefaultName = names[0];
             }
         }
-        
+
+        //加载SPI文件
         Map<String, Class<?>> extensionClasses = new HashMap<String, Class<?>>();
+        //加载dubbo的SPI接口文件中的接口，并存入extensionClasses中
         loadFile(extensionClasses, DUBBO_INTERNAL_DIRECTORY);
         loadFile(extensionClasses, DUBBO_DIRECTORY);
         loadFile(extensionClasses, SERVICES_DIRECTORY);
         return extensionClasses;
     }
-    
+
+    /**
+     * 分析SPI接口文件，加载有效的接口，
+     * 比如不是SPI接口的实现类的抛出异常，没有相应构造方法的抛出异常等
+     * @param extensionClasses
+     * @param dir
+     */
     private void loadFile(Map<String, Class<?>> extensionClasses, String dir) {
         String fileName = dir + type.getName();
         try {
@@ -733,8 +754,10 @@ public class ExtensionLoader<T> {
     }
     
     private Class<?> createAdaptiveExtensionClass() {
+        //生成的代码见Protocol$Adpative_code.txt
         String code = createAdaptiveExtensionClassCode();
         ClassLoader classLoader = findClassLoader();
+        //传入Compiler.class，其实就是得到一个new ExtensionLoader<Compiler>
         com.alibaba.dubbo.common.compiler.Compiler compiler = ExtensionLoader.getExtensionLoader(com.alibaba.dubbo.common.compiler.Compiler.class).getAdaptiveExtension();
         return compiler.compile(code, classLoader);
     }

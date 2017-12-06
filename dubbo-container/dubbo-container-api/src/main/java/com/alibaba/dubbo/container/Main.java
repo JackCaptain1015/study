@@ -40,6 +40,7 @@ public class Main {
     
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
+    //得到SpringContainer
     private static final ExtensionLoader<Container> loader = ExtensionLoader.getExtensionLoader(Container.class);
     
     private static volatile boolean running = true;
@@ -47,6 +48,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             if (args == null || args.length == 0) {
+                //获取dubbo.properties中属性（得到log4j与spring）
                 String config = ConfigUtils.getProperty(CONTAINER_KEY, loader.getDefaultExtensionName());
                 args = Constants.COMMA_SPLIT_PATTERN.split(config);
             }
@@ -55,6 +57,7 @@ public class Main {
             for (int i = 0; i < args.length; i ++) {
                 containers.add(loader.getExtension(args[i]));
             }
+            //使用Log4jContainer与SpringContainer
             logger.info("Use container type(" + Arrays.toString(args) + ") to run dubbo serivce.");
             
             if ("true".equals(System.getProperty(SHUTDOWN_HOOK_KEY))) {
