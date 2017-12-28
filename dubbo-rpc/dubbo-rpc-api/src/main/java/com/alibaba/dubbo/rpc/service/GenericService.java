@@ -20,6 +20,8 @@ package com.alibaba.dubbo.rpc.service;
  * 
  * @author william.liangf
  * @export
+ * 泛化调用，主要用于服务器端没有API接口及model的情况，
+ * 返回值会被转化为MAP
  */
 public interface GenericService {
 

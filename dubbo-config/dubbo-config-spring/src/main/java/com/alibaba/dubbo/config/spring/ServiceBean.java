@@ -106,7 +106,8 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
 
     public void onApplicationEvent(ApplicationEvent event) {
         if (ContextRefreshedEvent.class.getName().equals(event.getClass().getName())) {
-        	if (isDelay() && ! isExported() && ! isUnexported()) {
+            // TODO: 2017/12/10 这里的三个属性是哪里设置 
+            if (isDelay() && ! isExported() && ! isUnexported()) {
                 if (logger.isInfoEnabled()) {
                     logger.info("The service ready on spring started. service: " + getInterface());
                 }

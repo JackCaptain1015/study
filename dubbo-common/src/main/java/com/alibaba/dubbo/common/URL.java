@@ -68,6 +68,8 @@ import com.alibaba.dubbo.common.utils.StringUtils;
  * @author ding.lid
  * @see java.net.URL
  * @see java.net.URI
+ *
+ * 设置属性的时候直接返回一个新对象，这是为了线程安全
  */
 public final class URL implements Serializable {
 

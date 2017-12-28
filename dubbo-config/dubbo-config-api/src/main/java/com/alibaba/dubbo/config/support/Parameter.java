@@ -25,6 +25,10 @@ import java.lang.annotation.Target;
  * Parameter
  * 
  * @author william.liangf
+ * 为get方法设置默认的key，
+ * 比如在getName的时候，设置key为"name",
+ * 那么getName的时候得到的key就是"name"，这样可以放入Map中
+ * 这样做的好处，就相当于为一个Bean中的属性，定义了全局的key
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

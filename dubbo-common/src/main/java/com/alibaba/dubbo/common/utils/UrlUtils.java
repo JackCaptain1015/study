@@ -56,6 +56,7 @@ public class UrlUtils {
         int defaultPort = StringUtils.parseInteger(defaults == null ? null : defaults.get("port"));
         String defaultPath = defaults == null ? null : defaults.get("path");
         Map<String, String> defaultParameters = defaults == null ? null : new HashMap<String, String>(defaults);
+        //这些属性在URL中都有了，因此删除这些属性，这样可以直接把defaultParameters传给URL的parameters
         if (defaultParameters != null) {
             defaultParameters.remove("protocol");
             defaultParameters.remove("username");
@@ -127,6 +128,7 @@ public class UrlUtils {
         if (address == null || address.length() == 0) {
             return null;
         }
+        //遇到 |或者; 分割
         String[] addresses = Constants.REGISTRY_SPLIT_PATTERN.split(address);
         if (addresses == null || addresses.length == 0) {
             return null; //here won't be empty

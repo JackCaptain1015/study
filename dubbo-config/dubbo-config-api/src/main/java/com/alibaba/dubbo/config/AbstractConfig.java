@@ -134,6 +134,14 @@ public abstract class AbstractConfig implements Serializable {
         }
     }
 
+    /**
+     * 为config对象注入参数
+     * 参数可以来源系统配置，也可以从配置文件中获取，获取的key默认为两种方式：
+     *  1、dubbo.tagName.configId.property
+     *  2、dubbo.tagName.property
+     * 如果以上都没有就去legacyProperties中找
+     * @param config
+     */
     protected static void appendProperties(AbstractConfig config) {
         if (config == null) {
             return;
@@ -143,7 +151,11 @@ public abstract class AbstractConfig implements Serializable {
         for (Method method : methods) {
             try {
                 String name = method.getName();
-                if (name.length() > 3 && name.startsWith("set") && Modifier.isPublic(method.getModifiers()) 
+                /**
+                 * 获取config中public set方法（且入参个数为1的）,并为其设置参数,
+                 * 比如ApplicationConfig.setName(String name)
+                 */
+                if (name.length() > 3 && name.startsWith("set") && Modifier.isPublic(method.getModifiers())
                         && method.getParameterTypes().length == 1 && isPrimitive(method.getParameterTypes()[0])) {
                     String property = StringUtils.camelToSplitName(name.substring(3, 4).toLowerCase() + name.substring(4), "-");
 
@@ -191,6 +203,7 @@ public abstract class AbstractConfig implements Serializable {
                             }
                         }
                     }
+                    //注入value
                     if (value != null && value.length() > 0) {
                         method.invoke(config, new Object[] {convertPrimitive(method.getParameterTypes()[0], value)});
                     }
@@ -226,6 +239,7 @@ public abstract class AbstractConfig implements Serializable {
         for (Method method : methods) {
             try {
                 String name = method.getName();
+                //得到基本类型的public的get或is方法
                 if ((name.startsWith("get") || name.startsWith("is")) 
                         && ! "getClass".equals(name)
                         && Modifier.isPublic(method.getModifiers()) 
@@ -243,6 +257,7 @@ public abstract class AbstractConfig implements Serializable {
                     } else {
                         key = prop;
                     }
+                    //写new Object[0]而不是null，主要是为了传递参数的类型
                     Object value = method.invoke(config, new Object[0]);
                     String str = String.valueOf(value).trim();
                     if (value != null && str.length() > 0) {
