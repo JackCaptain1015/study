@@ -41,7 +41,9 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
     @SuppressWarnings("unchecked")
     @Override
     protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation) {
+        //group/interface:version.method
         String key = invokers.get(0).getUrl().getServiceKey() + "." + invocation.getMethodName();
+        //生成调用列表hashCode
         int identityHashCode = System.identityHashCode(invokers);
         ConsistentHashSelector<T> selector = (ConsistentHashSelector<T>) selectors.get(key);
         if (selector == null || selector.getIdentityHashCode() != identityHashCode) {
@@ -63,9 +65,14 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
 
         public ConsistentHashSelector(List<Invoker<T>> invokers, String methodName, int identityHashCode) {
             this.virtualInvokers = new TreeMap<Long, Invoker<T>>();
-            this.identityHashCode = System.identityHashCode(invokers);
+            this.identityHashCode = identityHashCode;
+            // 获取url，比如：dubbo://169.254.90.37:20880/service.DemoService?
+            // anyhost=true&application=srcAnalysisClient&check=false&dubbo=2.8.4&generic=false
+            // &interface=service.DemoService&loadbalance=consistenthash&methods=sayHello,retMap
+            // &pid=14648&sayHello.timeout=20000&side=consumer&timestamp=1493522325563
             URL url = invokers.get(0).getUrl();
             this.replicaNumber = url.getMethodParameter(methodName, "hash.nodes", 160);
+            //拿几个参数来进行hash计算
             String[] index = Constants.COMMA_SPLIT_PATTERN.split(url.getMethodParameter(methodName, "hash.arguments", "0"));
             argumentIndex = new int[index.length];
             for (int i = 0; i < index.length; i ++) {

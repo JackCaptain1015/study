@@ -24,6 +24,10 @@ import com.alibaba.dubbo.common.Node;
  * @see com.alibaba.dubbo.rpc.InvokerListener
  * @see com.alibaba.dubbo.rpc.protocol.AbstractInvoker
  * @author william.liangf
+ *
+ * Invoker更像consumer与provider之间的一个调用对象，
+ * 所有的调用过程都封装成Invoker，而信息存放在Invocation中，
+ * 通过Invoker.invoke(Invocation)得到result返回给consumer
  */
 public interface Invoker<T> extends Node {
 

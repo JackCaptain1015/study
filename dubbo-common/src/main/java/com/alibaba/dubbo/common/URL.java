@@ -1184,6 +1184,9 @@ public final class URL implements Serializable {
         return new InetSocketAddress(host, port);
     }
 
+    /**
+     * @return group/interface:version
+     */
     public String getServiceKey() {
         String inf = getServiceInterface();
         if (inf == null) return null;

@@ -365,6 +365,13 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         appendParameters(map, provider, Constants.DEFAULT_KEY);
         appendParameters(map, protocolConfig);
         appendParameters(map, this);
+        /**
+         * <dubbo:method>标签为<dubbo:service>或<dubbo:reference>的子标签.
+         * <dubbo:argument>标签为<dubbo:method>的子标签,
+         * argument标签中callback属性：
+         * 对应url参数为<metodName> 或 <index>.retries，
+         * url参数是否为callback接口，如果为callback，服务提供方将生成反向代理，可以从服务提供方反向调用消费方，通常用于事件推送.
+         */
 
         if (methods != null && methods.size() > 0) {
             for (MethodConfig method : methods) {

@@ -25,6 +25,8 @@ import java.util.Map;
  * @see com.alibaba.dubbo.rpc.RpcInvocation
  * @author qian.lei
  * @author william.liangf
+ *
+ * 得到provider中被调用方法的method、parameter、arguments与attachment
  */
 public interface Invocation {
 
