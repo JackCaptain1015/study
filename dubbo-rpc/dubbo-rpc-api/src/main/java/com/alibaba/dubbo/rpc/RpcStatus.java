@@ -70,11 +70,19 @@ public class RpcStatus {
         String uri = url.toIdentityString();
         ConcurrentMap<String, RpcStatus> map = METHOD_STATISTICS.get(uri);
         if (map == null) {
+            /**
+             * METHOD_STATISTICS中key为url,value为map
+             * map中key为methodName，value为RpcStatus
+             * 即<url,<methodName,RpcStatus>>
+             */
             METHOD_STATISTICS.putIfAbsent(uri, new ConcurrentHashMap<String, RpcStatus>());
             map = METHOD_STATISTICS.get(uri);
         }
         RpcStatus status = map.get(methodName);
         if (status == null) {
+            /**
+             * METHOD_STATISTICS中key为methodName,value为RpcStatus
+             */
             map.putIfAbsent(methodName, new RpcStatus());
             status = map.get(methodName);
         }

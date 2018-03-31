@@ -28,6 +28,10 @@ import com.alibaba.dubbo.rpc.RpcStatus;
  * LeastActiveLoadBalance
  * 
  * @author william.liangf
+ *
+ * 选择最少活跃的节点调用，相同最小活跃数的随机权重调用
+ * 活跃数指调用前后计数差，活跃数的修改发生在com.alibaba.dubbo.rpc.filter.ActiveLimitFilter中
+ * 使慢的提供者收到更少请求，因为越慢的提供者的调用前后计数差会越大。
  */
 public class LeastActiveLoadBalance extends AbstractLoadBalance {
 
@@ -43,8 +47,16 @@ public class LeastActiveLoadBalance extends AbstractLoadBalance {
         int totalWeight = 0; // 总权重
         int firstWeight = 0; // 第一个权重，用于于计算是否相同
         boolean sameWeight = true; // 是否所有权重相同
+        /**
+         * 遍历invokers
+         * 得到最小活跃数 或者
+         * 统计"累计相同最小的活跃数"
+         */
         for (int i = 0; i < length; i++) {
         	Invoker<T> invoker = invokers.get(i);
+            /**
+             * 返回该uri下method的活跃数
+             */
             int active = RpcStatus.getStatus(invoker.getUrl(), invocation.getMethodName()).getActive(); // 活跃数
             int weight = invoker.getUrl().getMethodParameter(invocation.getMethodName(), Constants.WEIGHT_KEY, Constants.DEFAULT_WEIGHT); // 权重
             if (leastActive == -1 || active < leastActive) { // 发现更小的活跃数，重新开始
@@ -69,6 +81,10 @@ public class LeastActiveLoadBalance extends AbstractLoadBalance {
             // 如果只有一个最小则直接返回
             return invokers.get(leastIndexs[0]);
         }
+        /**
+         * 如果有多个相同的“最小活跃数”，并且权重不相等，
+         * 那么按权重随机
+         */
         if (! sameWeight && totalWeight > 0) {
             // 如果权重不相同且权重大于0则按总权重数随机
             int offsetWeight = random.nextInt(totalWeight);
