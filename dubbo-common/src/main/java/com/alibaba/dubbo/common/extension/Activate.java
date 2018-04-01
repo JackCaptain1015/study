@@ -42,6 +42,11 @@ import java.lang.annotation.Target;
  * @see ExtensionLoader
  * @see ExtensionLoader#getActivateExtension(com.alibaba.dubbo.common.URL, String[], String)
  */
+
+/**
+ * 被注解的类，如果满足了group、value等条件，那么该类可以被spi中的getActivateExtension
+ * 获取到
+ */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
