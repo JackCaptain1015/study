@@ -31,7 +31,12 @@ import com.alibaba.dubbo.rpc.RpcStatus;
  *
  * 选择最少活跃的节点调用，相同最小活跃数的随机权重调用
  * 活跃数指调用前后计数差，活跃数的修改发生在com.alibaba.dubbo.rpc.filter.ActiveLimitFilter中
- * 使慢的提供者收到更少请求，因为越慢的提供者的调用前后计数差会越大。
+ * 如果使用LeastActive负载均衡，则需要启用ActiveLimitFilter，这样活跃数才会变化。
+ * 因此需要配置filter，filter 为 “activelimit”。
+ *
+ * 活跃数：其实就是调用数，在ActiveLimitFilter中，进入invoker.invoke之前，
+ * 活跃数+1，结束后活跃数-1
+ *
  */
 public class LeastActiveLoadBalance extends AbstractLoadBalance {
 

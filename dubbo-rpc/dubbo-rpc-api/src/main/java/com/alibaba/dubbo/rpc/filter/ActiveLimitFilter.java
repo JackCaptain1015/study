@@ -36,6 +36,11 @@ public class ActiveLimitFilter implements Filter {
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         URL url = invoker.getUrl();
         String methodName = invocation.getMethodName();
+        /**
+         * 获取到节点上最多能接待的调用数，0表示无限制
+         * 如果该节点的活跃数已经超过max了，则等待一段时间，
+         * 如果超时了就抛出异常
+         */
         int max = invoker.getUrl().getMethodParameter(methodName, Constants.ACTIVES_KEY, 0);
         RpcStatus count = RpcStatus.getStatus(invoker.getUrl(), invocation.getMethodName());
         if (max > 0) {
@@ -65,6 +70,9 @@ public class ActiveLimitFilter implements Filter {
         }
         try {
             long begin = System.currentTimeMillis();
+            /**
+             * beginCount活跃数+1,endCount活跃数-1
+             */
             RpcStatus.beginCount(url, methodName);
             try {
                 Result result = invoker.invoke(invocation);
