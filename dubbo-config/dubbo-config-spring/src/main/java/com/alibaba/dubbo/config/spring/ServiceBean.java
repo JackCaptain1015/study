@@ -75,8 +75,14 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
 	    return SPRING_CONTEXT;
 	}
 
+    /**
+     * ApplicationContextAware的方法
+     */
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
+        /**
+         * applicationContext加入到SpringExtensionFactory中
+         */
 		SpringExtensionFactory.addApplicationContext(applicationContext);
 		if (applicationContext != null) {
 		    SPRING_CONTEXT = applicationContext;
@@ -104,9 +110,14 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
         this.beanName = name;
     }
 
+    /**
+     * ApplicationListener的方法
+     */
     public void onApplicationEvent(ApplicationEvent event) {
         if (ContextRefreshedEvent.class.getName().equals(event.getClass().getName())) {
-            // TODO: 2017/12/10 这里的三个属性是哪里设置 
+            /**
+             * delay没有设置或者是-1 && 服务没有暴露 && 服务没有反注册
+             */
             if (isDelay() && ! isExported() && ! isUnexported()) {
                 if (logger.isInfoEnabled()) {
                     logger.info("The service ready on spring started. service: " + getInterface());
@@ -125,6 +136,21 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
         return supportedApplicationListener && (delay == null || delay.intValue() == -1);
     }
 
+    /**
+     * InitializingBean接口的方法：
+     *
+     * 流程：
+     * 1 检查ServiceBean的ProviderConfig provider，如果为空，从applicationContext获取ProviderConfig类型的bean
+     *  （其实就是看是否配置<dubbo:provider>），如果获取到了，进行设置
+     * 2 参照1分别进行
+     *   -- ApplicationConfig application
+     *   -- ModuleConfig module
+     *   -- List<RegistryConfig> registries
+     *   -- MonitorConfig monitor
+     *   -- List<ProtocolConfig> protocols
+     *   -- String path：服务名称
+     * 3 判断延迟的事件是否大于0，如果是，执行export()，进行服务暴露，如果不是，结束（这种情况下服务暴露，会发生在发布上下文刷新事件的时候）
+     */
     @SuppressWarnings({ "unchecked", "deprecation" })
 	public void afterPropertiesSet() throws Exception {
         if (getProvider() == null) {
