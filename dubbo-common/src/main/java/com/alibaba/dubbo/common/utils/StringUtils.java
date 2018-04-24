@@ -406,7 +406,10 @@ public final class StringUtils {
 		}
 		return buf.toString();
 	}
-	
+
+	/**
+	 * 拆开驼峰式用split拼接，比如camelName变为camel-name
+	 */
 	public static String camelToSplitName(String camelName, String split) {
 	    if (camelName == null || camelName.length() == 0) {
 	        return camelName;

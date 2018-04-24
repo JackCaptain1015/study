@@ -146,20 +146,22 @@ public abstract class AbstractConfig implements Serializable {
         if (config == null) {
             return;
         }
+        //<dubbo:registry address="multicast://224.5.6.7:1234" /> 中prefix为dubbo.registry.
         String prefix = "dubbo." + getTagName(config.getClass()) + ".";
         Method[] methods = config.getClass().getMethods();
         for (Method method : methods) {
             try {
                 String name = method.getName();
-                /**
-                 * 获取config中public set方法（且入参个数为1的）,并为其设置参数,
-                 * 比如ApplicationConfig.setName(String name)
-                 */
+                //如果是setParam
                 if (name.length() > 3 && name.startsWith("set") && Modifier.isPublic(method.getModifiers())
                         && method.getParameterTypes().length == 1 && isPrimitive(method.getParameterTypes()[0])) {
+
                     String property = StringUtils.camelToSplitName(name.substring(3, 4).toLowerCase() + name.substring(4), "-");
 
                     String value = null;
+                    /**
+                     * System.getProperty()即去dubbo-default.properties中查找
+                     */
                     if (config.getId() != null && config.getId().length() > 0) {
                         String pn = prefix + config.getId() + "." + property;
                         value = System.getProperty(pn);
@@ -185,6 +187,11 @@ public abstract class AbstractConfig implements Serializable {
                                 getter = null;
                             }
                         }
+                        /**
+                         * 调用这个方法：
+                         *  1、返回为null，去configUtils中查
+                         *  2、不为null就直接设置
+                         */
                         if (getter != null) {
                             if (getter.invoke(config, new Object[0]) == null) {
                                 if (config.getId() != null && config.getId().length() > 0) {
@@ -213,7 +220,12 @@ public abstract class AbstractConfig implements Serializable {
             }
         }
     }
-    
+
+    /**
+     * RegistryConfig返回registry
+     * @param cls
+     * @return
+     */
     private static String getTagName(Class<?> cls) {
         String tag = cls.getSimpleName();
         for (String suffix : SUFFIXS) {
@@ -339,7 +351,12 @@ public abstract class AbstractConfig implements Serializable {
             }
         }
     }
-    
+
+    /**
+     * isPrimitive判断是否为基本类型
+     * @param type
+     * @return
+     */
     private static boolean isPrimitive(Class<?> type) {
         return type.isPrimitive() 
                 || type == String.class 
@@ -470,7 +487,11 @@ public abstract class AbstractConfig implements Serializable {
     }
     
     private static final String[] SUFFIXS = new String[] {"Config", "Bean"};
-    
+
+    /**
+     * 整个过程即：<dubbo: ----> foreach method ----> is/get param -----> method.invoke ----->拿到value---->key+"="+value
+     * @return
+     */
     @Override
     public String toString() {
         try {
@@ -488,6 +509,7 @@ public abstract class AbstractConfig implements Serializable {
                             && isPrimitive(method.getReturnType())) {
                         int i = name.startsWith("get") ? 3 : 2;
                         String key = name.substring(i, i + 1).toLowerCase() + name.substring(i + 1);
+                        //调用method，拿到value
                         Object value = method.invoke(this, new Object[0]);
                         if (value != null) {
                             buf.append(" ");

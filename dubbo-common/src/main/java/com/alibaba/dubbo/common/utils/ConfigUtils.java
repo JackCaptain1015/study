@@ -115,16 +115,21 @@ public class ConfigUtils {
         return names;
 	}
 
+    /**
+     * 匹配$开头的变量
+     */
     private static Pattern VARIABLE_PATTERN = Pattern.compile(
             "\\$\\s*\\{?\\s*([\\._0-9a-zA-Z]+)\\s*\\}?");
     
 	public static String replaceProperty(String expression, Map<String, String> params) {
+	    //string.indexOf不存在返回-1
         if (expression == null || expression.length() == 0 || expression.indexOf('$') < 0) {
             return expression;
         }
         Matcher matcher = VARIABLE_PATTERN.matcher(expression);
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) { // 逐个匹配
+            //取到([\._0-9a-zA-Z]+)里的值 注:group即组，()为一组
             String key = matcher.group(1);
             String value = System.getProperty(key);
             if (value == null && params != null) {
@@ -133,8 +138,11 @@ public class ConfigUtils {
             if (value == null) {
                 value = "";
             }
+            //Matcher.quoteReplacement(str)将str中的正则表达式特殊字符转换为普通字符
+            //matcher.appendReplacement(sb,rep)将匹配到的str替换成rep放入sb中
             matcher.appendReplacement(sb, Matcher.quoteReplacement(value));
         }
+        //matcher.appendTail(sb)将最后一次匹配后的剩余字符串加到sb里
         matcher.appendTail(sb);
         return sb.toString();
     }
@@ -147,6 +155,10 @@ public class ConfigUtils {
                 if (PROPERTIES == null) {
                     String path = System.getProperty(Constants.DUBBO_PROPERTIES_KEY);
                     if (path == null || path.length() == 0) {
+                        /**
+                         * getenv是获取系统的环境变更
+                         * getProperties是java系统的属性，比如dubbo-default.properties中的属性
+                         */
                         path = System.getenv(Constants.DUBBO_PROPERTIES_KEY);
                         if (path == null || path.length() == 0) {
                             path = Constants.DEFAULT_DUBBO_PROPERTIES;
@@ -223,6 +235,7 @@ public class ConfigUtils {
         
         List<java.net.URL> list = new ArrayList<java.net.URL>();
         try {
+            //AppClassloader.getResources(fileName) ---->getUrl--->list.add ----> check url nums ----> properties.load(AppClassloader.getResourceAsStream(num))
             Enumeration<java.net.URL> urls = ClassHelper.getClassLoader().getResources(fileName);
             list = new ArrayList<java.net.URL>();
             while (urls.hasMoreElements()) {
