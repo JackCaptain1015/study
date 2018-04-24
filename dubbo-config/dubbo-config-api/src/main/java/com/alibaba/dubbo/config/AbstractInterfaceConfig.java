@@ -102,7 +102,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
 	private String scope;
 
     protected void checkRegistry() {
-        // 兼容旧版本
+        // 兼容旧版本 旧版本中address可以通过 | 来写入多个url，这里把url也加入进来
         if (registries == null || registries.size() == 0) {
             String address = ConfigUtils.getProperty("dubbo.registry.address");
             if (address != null && address.length() > 0) {
@@ -162,6 +162,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
      * @return
      */
     protected List<URL> loadRegistries(boolean provider) {
+        //provider的时候在之前的doExport()中已经为RegistryConfig注册过了，但是consumer没有
         checkRegistry();
         List<URL> registryList = new ArrayList<URL>();
         if (registries != null && registries.size() > 0) {
@@ -179,7 +180,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                 if (address != null && address.length() > 0 
                         && ! RegistryConfig.NO_AVAILABLE.equalsIgnoreCase(address)) {
                     Map<String, String> map = new HashMap<String, String>();
-                    //将config中的属性放到map中去
+                    //将Config中的带有@Parameter注解的属性放到map中去
                     appendParameters(map, application);
                     appendParameters(map, config);
                     map.put("path", RegistryService.class.getName());
@@ -189,6 +190,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                         map.put(Constants.PID_KEY, String.valueOf(ConfigUtils.getPid()));
                     }
                     if (! map.containsKey("protocol")) {
+                        //如果有用户自定义的协议，就用自定义的协议(spi查询是否有remote接口),否则用dubbo protocol
                         if (ExtensionLoader.getExtensionLoader(RegistryFactory.class).hasExtension("remote")) {
                             map.put("protocol", "remote");
                         } else {

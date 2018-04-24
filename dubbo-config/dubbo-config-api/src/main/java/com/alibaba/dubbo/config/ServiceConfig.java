@@ -144,7 +144,10 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             doExport();
         }
     }
-    
+
+    /**
+     * 先拿到配置，再暴露
+     */
     protected synchronized void doExport() {
         if (unexported) {
             throw new IllegalStateException("Already unexported!");
@@ -156,6 +159,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         if (interfaceName == null || interfaceName.length() == 0) {
             throw new IllegalStateException("<dubbo:service interface=\"\" /> interface not allow null!");
         }
+        //为ProviderConfig注入属性
         checkDefault();
         if (provider != null) {
             if (application == null) {
@@ -235,11 +239,13 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                 throw new IllegalStateException("The stub implemention class " + stubClass.getName() + " not implement interface " + interfaceName);
             }
         }
-        //为ApplicationConfig设置name等
+        //为ApplicationConfig注入属性，如果有shutdown.wait就顺便设置进系统
         checkApplication();
-        //为RegistryConfig设置Address
+        //为RegistryConfig注入属性，属性值来自properties等
         checkRegistry();
+        //为Protocol注入属性
         checkProtocol();
+        //为serviceConfig注入属性
         appendProperties(this);
         checkStubAndMock(interfaceClass);
         if (path == null || path.length() == 0) {

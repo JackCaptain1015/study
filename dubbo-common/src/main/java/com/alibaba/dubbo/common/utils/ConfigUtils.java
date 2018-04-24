@@ -298,6 +298,7 @@ public class ConfigUtils {
     public static int getPid() {
         if (PID < 0) {
             try {
+                //RuntimeMXBean是JVM的运行时系统的管理接口,可以获取正在运行的JVM信息，包括获取PID。
                 RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();  
                 String name = runtime.getName(); // format: "pid@hostname"  
                 PID = Integer.parseInt(name.substring(0, name.indexOf('@')));

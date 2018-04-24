@@ -139,8 +139,8 @@ public abstract class AbstractConfig implements Serializable {
      * 参数可以来源系统配置，也可以从配置文件中获取，获取的key默认为两种方式：
      *  1、dubbo.tagName.configId.property
      *  2、dubbo.tagName.property
-     * 如果以上都没有就去legacyProperties中找
-     * @param config
+     *
+     * 如果以上都没有就去legacyProperties中找相应的key，再去查询
      */
     protected static void appendProperties(AbstractConfig config) {
         if (config == null) {
@@ -241,7 +241,11 @@ public abstract class AbstractConfig implements Serializable {
     protected static void appendParameters(Map<String, String> parameters, Object config) {
         appendParameters(parameters, config, null);
     }
-    
+
+    /**
+     * 将Config中的带有@Parameter注解的属性放到parameters中去
+     * @param config
+     */
     @SuppressWarnings("unchecked")
     protected static void appendParameters(Map<String, String> parameters, Object config, String prefix) {
         if (config == null) {
@@ -263,7 +267,9 @@ public abstract class AbstractConfig implements Serializable {
                     }
                     int i = name.startsWith("get") ? 3 : 2;
                     String prop = StringUtils.camelToSplitName(name.substring(i, i + 1).toLowerCase() + name.substring(i + 1), ".");
+                    //如果在@Parameter中指定了key，就用指定的，否则就用被截断的方法名
                     String key;
+                    //@Parameter中的key是写注解的时候指定的
                     if (parameter != null && parameter.key() != null && parameter.key().length() > 0) {
                         key = parameter.key();
                     } else {
@@ -293,6 +299,7 @@ public abstract class AbstractConfig implements Serializable {
                     } else if (parameter != null && parameter.required()) {
                         throw new IllegalStateException(config.getClass().getSimpleName() + "." + key + " == null");
                     }
+                    //如果是getParameters方法就直接调用方法返回map
                 } else if ("getParameters".equals(name)
                         && Modifier.isPublic(method.getModifiers()) 
                         && method.getParameterTypes().length == 0

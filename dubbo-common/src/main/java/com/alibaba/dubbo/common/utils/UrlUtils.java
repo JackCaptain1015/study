@@ -34,10 +34,12 @@ public class UrlUtils {
         if (address.indexOf("://") >= 0) {
             url = address;
         } else {
+            //逗号分割后取第一个元素
             String[] addresses = Constants.COMMA_SPLIT_PATTERN.split(address);
             url = addresses[0];
             if (addresses.length > 1) {
                 StringBuilder backup = new StringBuilder();
+                //拼接第一个元素后面的地址,即最后变为 addresses[0]?backup=addresses[n-1],addresses[n]
                 for (int i = 1; i < addresses.length; i++) {
                     if (i > 1) {
                         backup.append(",");
@@ -55,6 +57,7 @@ public class UrlUtils {
         String defaultPassword = defaults == null ? null : defaults.get("password");
         int defaultPort = StringUtils.parseInteger(defaults == null ? null : defaults.get("port"));
         String defaultPath = defaults == null ? null : defaults.get("path");
+        //defaults与defaultParameters分开成了两个对象
         Map<String, String> defaultParameters = defaults == null ? null : new HashMap<String, String>(defaults);
         //这些属性在URL中都有了，因此删除这些属性，这样可以直接把defaultParameters传给URL的parameters
         if (defaultParameters != null) {
