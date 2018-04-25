@@ -22,6 +22,10 @@
 	
 	<bean id="demoService" class="com.alibaba.dubbo.demo.provider.DemoServiceImpl" />
 	
-	<dubbo:service interface="com.alibaba.dubbo.demo.DemoService" ref="demoService" />
+	<dubbo:service interface="com.alibaba.dubbo.demo.DemoService" ref="demoService" >
+		<dubbo:method name="sayHello" retries="0">
+			<dubbo:argument type="String" callback="true"/>
+		</dubbo:method>
+	</dubbo:service>
 	
 </beans>

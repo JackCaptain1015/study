@@ -305,9 +305,11 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             host = provider.getHost();
         }
         boolean anyhost = false;
+        //如果host是本地，说明链接到本机就可以了
         if (NetUtils.isInvalidLocalHost(host)) {
             anyhost = true;
             try {
+                //主机地址(ip) 比如:192.168.10.37
                 host = InetAddress.getLocalHost().getHostAddress();
             } catch (UnknownHostException e) {
                 logger.warn(e.getMessage(), e);
@@ -337,7 +339,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                 }
             }
         }
-
+        //获取端口
         Integer port = protocolConfig.getPort();
         if (provider != null && (port == null || port == 0)) {
             port = provider.getPort();
@@ -355,7 +357,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             logger.warn("Use random available port(" + port + ") for protocol " + name);
         }
 
-        //将配置放入map中
+        //将一些默认配置以及Config中被@Parameter注解的参数放入map中
         Map<String, String> map = new HashMap<String, String>();
         if (anyhost) {
             map.put(Constants.ANYHOST_KEY, "true");
@@ -381,6 +383,8 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
 
         if (methods != null && methods.size() > 0) {
             for (MethodConfig method : methods) {
+                //将methodConfig中被@Parameter注解的属性加到map中
+                //如果这个方法的retry是false，那么重试次数设置为0
                 appendParameters(map, method, method.getName());
                 String retryKey = method.getName() + ".retry";
                 if (map.containsKey(retryKey)) {
@@ -389,20 +393,22 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                         map.put(method.getName() + ".retries", "0");
                     }
                 }
+                //方法的参数配置,比如<dubbo:argument index="0" callback="true" /> http://dubbo.apache.org/books/dubbo-user-book/references/xml/dubbo-argument.html
                 List<ArgumentConfig> arguments = method.getArguments();
                 if (arguments != null && arguments.size() > 0) {
                     for (ArgumentConfig argument : arguments) {
-                        //类型自动转换.
+                        //ArgumentConfig中index与type只能二选一
                         if(argument.getType() != null && argument.getType().length() >0){
+                            //interfaceClass就是<dubbo:service>中的interface，比如com.alibaba.dubbo.demo.DemoService
                             Method[] methods = interfaceClass.getMethods();
-                            //遍历所有方法
                             if(methods != null && methods.length > 0){
                                 for (int i = 0; i < methods.length; i++) {
                                     String methodName = methods[i].getName();
-                                    //匹配方法名称，获取方法签名.
+                                    //注意，这里method是<dubbo:method>，即methodConfig，不要与methods搞混
                                     if(methodName.equals(method.getName())){
                                         Class<?>[] argtypes = methods[i].getParameterTypes();
-                                        //一个方法中单个callback
+                                        //如果type和index都写了，那么进type逻辑以后，再判断index对应的argument的类型是否相同，
+                                        //相同则将ArgumentConfig中被@Parameter注解的参数放到map中
                                         if (argument.getIndex() != -1 ){
                                             if (argtypes[argument.getIndex()].getName().equals(argument.getType())){
                                                 appendParameters(map, argument, method.getName() + "." + argument.getIndex());
@@ -410,7 +416,8 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                                                 throw new IllegalArgumentException("argument config error : the index attribute and type attirbute not match :index :"+argument.getIndex() + ", type:" + argument.getType());
                                             }
                                         } else {
-                                            //一个方法中多个callback
+                                            //遍历argument，找到type相同的参数，把这个ArgumentConfig位置中被@Parameter注解的
+                                            //参数放到map中
                                             for (int j = 0 ;j<argtypes.length ;j++) {
                                                 Class<?> argclazz = argtypes[j];
                                                 if (argclazz.getName().equals(argument.getType())){

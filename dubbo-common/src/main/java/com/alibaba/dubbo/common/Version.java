@@ -70,8 +70,12 @@ public final class Version {
     public static String getVersion(Class<?> cls, String defaultVersion) {
         try {
             // 首先查找MANIFEST.MF规范中的版本号
+            // implementationVersion和specificationVersion都是MANIFEST.MF文件中指定的值
+            // implementationVersion没有格式规范，可以随意指定值
             String version = cls.getPackage().getImplementationVersion();
             if (version == null || version.length() == 0) {
+                //getSpecificationVersion是jar包的版本号，规范中指定必须以1.8这样的格式表示，
+                //这样规范的好处在于用于解析jar包依赖
                 version = cls.getPackage().getSpecificationVersion();
             }
             if (version == null || version.length() == 0) {

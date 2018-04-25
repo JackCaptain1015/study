@@ -122,7 +122,7 @@ public class NetUtils {
     }
 
     /**
-     * 如果当前host是本地，那么返回true
+     * 如果当前host是无效的本地地址，那么返回true
      */
     public static boolean isInvalidLocalHost(String host) {
         return host == null 
@@ -143,7 +143,13 @@ public class NetUtils {
 
     private static final Pattern IP_PATTERN = Pattern.compile("\\d{1,3}(\\.\\d{1,3}){3,5}$");
 
+    /**
+     * 如果是本地ip就返回false，如果不是就返回true(并且是正确ip)
+     * @param address
+     * @return
+     */
     private static boolean isValidAddress(InetAddress address) {
+        //loopback地址就是代表本机的IP地址。IPv4的loopback地址的范围是127.0.0.0 ~ 127.255.255.255，即只要第一个字节是127，就是lookback地址
         if (address == null || address.isLoopbackAddress())
             return false;
         String name = address.getHostAddress();
@@ -152,7 +158,7 @@ public class NetUtils {
                 && ! LOCALHOST.equals(name) 
                 && IP_PATTERN.matcher(name).matches());
     }
-    
+
     public static String getLocalHost(){
         InetAddress address = getLocalAddress();
         return address == null ? LOCALHOST : address.getHostAddress();
@@ -204,23 +210,28 @@ public class NetUtils {
         InetAddress localAddress = null;
         try {
             localAddress = InetAddress.getLocalHost();
+            //如果不是本地ip就返回
             if (isValidAddress(localAddress)) {
                 return localAddress;
             }
         } catch (Throwable e) {
             logger.warn("Failed to retriving ip address, " + e.getMessage(), e);
         }
+        //如果是本地ip
         try {
+            //取到所有网络接口(网卡)
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             if (interfaces != null) {
                 while (interfaces.hasMoreElements()) {
                     try {
                         NetworkInterface network = interfaces.nextElement();
+                        //一个网卡可以存多个地址
                         Enumeration<InetAddress> addresses = network.getInetAddresses();
                         if (addresses != null) {
                             while (addresses.hasMoreElements()) {
                                 try {
                                     InetAddress address = addresses.nextElement();
+                                    //取到一个不是本地的ip返回
                                     if (isValidAddress(address)) {
                                         return address;
                                     }

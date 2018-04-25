@@ -32,6 +32,11 @@ public class ProtocolUtils {
         return buf.toString();
     }
 
+    /**
+     * 判断是否为通用的序列化方式，如果是就返回true
+     * @param generic
+     * @return
+     */
     public static boolean isGeneric(String generic) {
         return generic != null
             && !"".equals(generic)
