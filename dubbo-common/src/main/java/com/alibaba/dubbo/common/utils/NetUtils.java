@@ -120,7 +120,10 @@ public class NetUtils {
     public static boolean isAnyHost(String host) {
         return "0.0.0.0".equals(host);
     }
-    
+
+    /**
+     * 如果当前host是本地，那么返回true
+     */
     public static boolean isInvalidLocalHost(String host) {
         return host == null 
         			|| host.length() == 0
