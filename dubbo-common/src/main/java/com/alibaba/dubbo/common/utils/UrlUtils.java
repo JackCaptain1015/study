@@ -26,6 +26,12 @@ import com.alibaba.dubbo.common.URL;
 
 public class UrlUtils {
 
+    /**
+     * 解析url，将url中的协议、host、端口分开，并设置url中可能携带的6个属性，并把defaults中多余的参数放入url的parameters属性中
+     * @param address
+     * @param defaults
+     * @return
+     */
     public static URL parseURL(String address, Map<String, String> defaults) {
         if (address == null || address.length() == 0) {
             return null;
@@ -59,7 +65,7 @@ public class UrlUtils {
         String defaultPath = defaults == null ? null : defaults.get("path");
         //defaults与defaultParameters分开成了两个对象
         Map<String, String> defaultParameters = defaults == null ? null : new HashMap<String, String>(defaults);
-        //这些属性在URL中都有了，因此删除这些属性，这样可以直接把defaultParameters传给URL的parameters
+        //这些属性在URL中都有可能携带，因此删除这些属性，这样可以直接把defaultParameters在最后的时候传给URL设置
         if (defaultParameters != null) {
             defaultParameters.remove("protocol");
             defaultParameters.remove("username");
@@ -68,6 +74,7 @@ public class UrlUtils {
             defaultParameters.remove("port");
             defaultParameters.remove("path");
         }
+        //URL.valueOf中将url中的协议、host、端口分开，并设置url中可能携带的6个属性
         URL u = URL.valueOf(url);
         boolean changed = false;
         String protocol = u.getProtocol();
@@ -89,10 +96,6 @@ public class UrlUtils {
             changed = true;
             password = defaultPassword;
         }
-        /*if (u.isAnyHost() || u.isLocalHost()) {
-            changed = true;
-            host = NetUtils.getLocalHost();
-        }*/
         if (port <= 0) {
             if (defaultPort > 0) {
                 changed = true;

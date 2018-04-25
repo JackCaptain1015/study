@@ -172,7 +172,7 @@ public final class URL implements Serializable {
 
     /**
      * Parse url string
-     * 
+     * 将url中的协议、host、端口分开，并设置url中可能携带的6个属性
      * @param url URL string
      * @return URL instance
      * @see URL
@@ -190,6 +190,7 @@ public final class URL implements Serializable {
         Map<String, String> parameters = null;
         int i = url.indexOf("?"); // seperator between body and parameters 
         if (i >= 0) {
+            //将url后面的参数放到parameters中
             String[] parts = url.substring(i + 1).split("\\&");
             parameters = new HashMap<String, String>();
             for (String part : parts) {
@@ -208,6 +209,7 @@ public final class URL implements Serializable {
         i = url.indexOf("://");
         if (i >= 0) {
             if(i == 0) throw new IllegalStateException("url missing protocol: \"" + url + "\"");
+            //拿到protocol，即"://"之前的就是protocol，比如multicast
             protocol = url.substring(0, i);
             url = url.substring(i + 3);
         }
@@ -238,6 +240,7 @@ public final class URL implements Serializable {
         }
         i = url.indexOf(":");
         if (i >= 0 && i < url.length() - 1) {
+            //获取端口
             port = Integer.parseInt(url.substring(i + 1));
             url = url.substring(0, i);
         }
@@ -1056,6 +1059,10 @@ public final class URL implements Serializable {
         return map;
     }
 
+    /**
+     * 协议://host:端口/path?parameters
+     * @return
+     */
 	public String toString() {
 	    if (string != null) {
             return string;

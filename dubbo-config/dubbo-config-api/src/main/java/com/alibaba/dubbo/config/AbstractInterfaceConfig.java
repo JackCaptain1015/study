@@ -197,6 +197,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                             map.put("protocol", "dubbo");
                         }
                     }
+                    //解析url，将url中的协议、host、端口分开，并设置url中可能携带的6个属性，并把map中多余的参数放入url的parameters属性中
                     List<URL> urls = UrlUtils.parseURLs(address, map);
                     for (URL url : urls) {
                         //每次设置属性的时候都返回一个新对象，这是为了线程安全
