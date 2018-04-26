@@ -41,6 +41,7 @@ public abstract class AbstractProtocol implements Protocol {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
+	//key为<dubbo:service>中的interface属性
 	protected final Map<String, Exporter<?>> exporterMap = new ConcurrentHashMap<String, Exporter<?>>();
 
 	//TODO SOFEREFENCE

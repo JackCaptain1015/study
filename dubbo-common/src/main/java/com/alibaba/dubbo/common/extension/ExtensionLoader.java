@@ -85,6 +85,7 @@ public class ExtensionLoader<T> {
     
     private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<Map<String,Class<?>>>();
 
+    //key为@Activate注解中的value值
     private final Map<String, Activate> cachedActivates = new ConcurrentHashMap<String, Activate>();
 
     private volatile Class<?> cachedAdaptiveClass = null;
@@ -199,8 +200,11 @@ public class ExtensionLoader<T> {
             for (Map.Entry<String, Activate> entry : cachedActivates.entrySet()) {
                 String name = entry.getKey();
                 Activate activate = entry.getValue();
+                //先过滤组，group即当前系统的角色，consumer或是provider
                 if (isMatchGroup(group, activate.group())) {
+                    //根据@Activate中的value(即cacheActivates中的key)去拿SPI实现
                     T ext = getExtension(name);
+                    //过滤完group后过滤value(如果该value在之前已经被过滤过了，那么就不再重复添加)
                     if (! names.contains(name)
                             && ! names.contains(Constants.REMOVE_VALUE_PREFIX + name) 
                             && isActive(activate, url)) {
@@ -231,7 +235,10 @@ public class ExtensionLoader<T> {
         }
         return exts;
     }
-    
+
+    /**
+     * 如果group在groups中，那么就返回true
+     */
     private boolean isMatchGroup(String group, String[] groups) {
         if (group == null || group.length() == 0) {
             return true;
@@ -245,7 +252,10 @@ public class ExtensionLoader<T> {
         }
         return false;
     }
-    
+
+    /**
+     * 判断是否活跃
+     */
     private boolean isActive(Activate activate, URL url) {
         String[] keys = activate.value();
         if (keys == null || keys.length == 0) {

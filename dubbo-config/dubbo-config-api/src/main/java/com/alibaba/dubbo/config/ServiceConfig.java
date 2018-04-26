@@ -485,7 +485,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         }
 
         String scope = url.getParameter(Constants.SCOPE_KEY);
-        //配置为none不暴露
+        //配置为none不暴露,scope不为none即暴露(null也暴露)
         if (! Constants.SCOPE_NONE.toString().equalsIgnoreCase(scope)) {
 
             //配置不是remote的情况下做本地暴露 (配置为remote，则表示只暴露远程服务)
@@ -527,11 +527,14 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private void exportLocal(URL url) {
+        //如果是本地暴露那么protocol就是injvm，如果protocol在进来之前已经是injvm，
+        //那么说明之前已经暴露过了，因为下面第一行就设置injvm协议了(injvm说明是同一个jvm运行)
         if (!Constants.LOCAL_PROTOCOL.equalsIgnoreCase(url.getProtocol())) {
             URL local = URL.valueOf(url.toFullString())
                     .setProtocol(Constants.LOCAL_PROTOCOL)
                     .setHost(NetUtils.LOCALHOST)
                     .setPort(0);
+            //ref为<dubbo:service>的代理类,interfaceClass为<dubbo:service>的interface属性
             Exporter<?> exporter = protocol.export(
                     proxyFactory.getInvoker(ref, (Class) interfaceClass, local));
             exporters.add(exporter);

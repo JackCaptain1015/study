@@ -69,6 +69,9 @@ public @interface Activate {
      * <br/>
      * 如没有设置，则不过滤。
      */
+    /**
+     * 即如果value中设置了("cache,validation")，那么url只要包含其中一个值就可以通过
+     */
     String[] value() default {};
 
     /**

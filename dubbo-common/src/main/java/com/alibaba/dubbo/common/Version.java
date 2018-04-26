@@ -79,13 +79,14 @@ public final class Version {
                 version = cls.getPackage().getSpecificationVersion();
             }
             if (version == null || version.length() == 0) {
-                // 如果规范中没有版本号，基于jar包名获取版本号
+                // 如果规范中没有版本号，基于jar包名获取版本号,即Vsersion.java文件所在的文件夹地址(target中的地址)
                 CodeSource codeSource = cls.getProtectionDomain().getCodeSource();
                 if(codeSource == null) {
                     logger.info("No codeSource for class " + cls.getName() + " when getVersion, use default version " + defaultVersion);
                 }
                 else {
                     String file = codeSource.getLocation().getFile();
+                    //如果文件时以.jar包结尾的，通过阶段符号来获取里面的版本号
                     if (file != null && file.length() > 0 && file.endsWith(".jar")) {
                         file = file.substring(0, file.length() - 4);
                         int i = file.lastIndexOf('/');

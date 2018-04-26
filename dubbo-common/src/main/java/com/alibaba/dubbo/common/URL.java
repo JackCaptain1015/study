@@ -69,7 +69,7 @@ import com.alibaba.dubbo.common.utils.StringUtils;
  * @see java.net.URL
  * @see java.net.URI
  *
- * 设置属性的时候直接返回一个新对象，这是为了线程安全
+ * 设置属性的时候直接返回一个新对象，这是为了线程安全(MVCC)
  */
 public final class URL implements Serializable {
 
