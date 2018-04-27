@@ -68,6 +68,8 @@ public class ProtocolFilterWrapper implements Protocol {
 
     private static <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group) {
         Invoker<T> last = invoker;
+        //获取Filter的ExtensionLoader(ExtensionLoader中有ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS)，
+        //然后获取里面被@Activate注解、有效的类
         List<Filter> filters = ExtensionLoader.getExtensionLoader(Filter.class).getActivateExtension(invoker.getUrl(), key, group);
         /**
          * 过滤链中，filter总在invoker之前调用

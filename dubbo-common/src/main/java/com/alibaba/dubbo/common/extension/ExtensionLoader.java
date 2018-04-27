@@ -170,7 +170,7 @@ public class ExtensionLoader<T> {
      * This is equivalent to <pre>
      *     getActivateExtension(url, url.getParameter(key).split(","), null);
      * </pre>
-     *
+     * 获取到被@Activate注解的合适的类，也可以指定特定的extension名字(即value)，一并返回
      * @see #getActivateExtension(com.alibaba.dubbo.common.URL, String[], String)
      * @param url url
      * @param key url parameter key which used to get extension point names
@@ -178,15 +178,16 @@ public class ExtensionLoader<T> {
      * @return extension list which are activated.
      */
     public List<T> getActivateExtension(URL url, String key, String group) {
+        //这里的key比如service.filter，获取到的value即类的名字
         String value = url.getParameter(key);
         return getActivateExtension(url, value == null || value.length() == 0 ? null : Constants.COMMA_SPLIT_PATTERN.split(value), group);
     }
 
     /**
      * Get activate extensions.
-     *
+     * 获取到被@Activate注解的合适的类，也可以指定特定的extension名字，一并返回
      * @see com.alibaba.dubbo.common.extension.Activate
-     * @param url url
+     * @param url url 这里Url只是提供parameter来去筛选被@Activate注解的类是否符合条件而已
      * @param values extension point names
      * @param group group
      * @return extension list which are activated
@@ -216,6 +217,8 @@ public class ExtensionLoader<T> {
             Collections.sort(exts, ActivateComparator.COMPARATOR);
         }
         List<T> usrs = new ArrayList<T>();
+        //如果指定了spi实现类的名字，那么就去获取spi放入usrs中，
+        //如果spi名字的default，并且usrs中有值，那么就把usrs中的值放exts数组前面，并清空usrs，避免后面exts又添加一遍
         for (int i = 0; i < names.size(); i ++) {
         	String name = names.get(i);
             if (! name.startsWith(Constants.REMOVE_VALUE_PREFIX)
