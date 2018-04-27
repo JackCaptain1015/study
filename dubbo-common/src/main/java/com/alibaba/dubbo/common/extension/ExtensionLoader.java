@@ -212,6 +212,7 @@ public class ExtensionLoader<T> {
                     }
                 }
             }
+            //根据exts中对象的@Activate中的before和after进行排序
             Collections.sort(exts, ActivateComparator.COMPARATOR);
         }
         List<T> usrs = new ArrayList<T>();

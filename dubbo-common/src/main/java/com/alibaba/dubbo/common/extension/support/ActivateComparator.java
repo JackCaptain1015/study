@@ -30,6 +30,9 @@ public class ActivateComparator implements Comparator<Object> {
     
     public static final Comparator<Object> COMPARATOR = new ActivateComparator();
 
+    /**
+     * o2在上，o1在下
+     */
     public int compare(Object o1, Object o2) {
         if (o1 == null && o2 == null) {
             return 0;
@@ -45,6 +48,8 @@ public class ActivateComparator implements Comparator<Object> {
         }
         Activate a1 = o1.getClass().getAnnotation(Activate.class);
         Activate a2 = o2.getClass().getAnnotation(Activate.class);
+        //o1和o2的@Activate注解上before或after是正数，并且o1的第一个接口上有@SPI
+        //还是按照o1和o2中@Activate中的before和after值进行排序
         if ((a1.before().length > 0 || a1.after().length > 0  
                 || a2.before().length > 0 || a2.after().length > 0) 
                 && o1.getClass().getInterfaces().length > 0
@@ -79,7 +84,9 @@ public class ActivateComparator implements Comparator<Object> {
         }
         int n1 = a1 == null ? 0 : a1.order();
         int n2 = a2 == null ? 0 : a2.order();
-        return n1 > n2 ? 1 : -1; // 就算n1 == n2也不能返回0，否则在HashSet等集合中，会被认为是同一值而覆盖
+        // 就算n1 == n2也不能返回0，否则在HashSet等集合中，会被认为是同一值而覆盖
+        // 即排序的是HashSet，那么如果返回0的话，其中元素将被覆盖
+        return n1 > n2 ? 1 : -1;
     }
 
 }

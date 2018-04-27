@@ -75,7 +75,9 @@ public @interface Activate {
     String[] value() default {};
 
     /**
-     * 排序信息，可以不提供。
+     * 如果这个注解在A接口上，此时A与B比较，如果A中@Activate中before的值是B接口的名字，那么A接口排在B接口之前，
+     * after同理，如果写的是B接口名字，那么A排在B接口之后。
+     * 排序在ActivateComparator类中
      */
     String[] before() default {};
 
