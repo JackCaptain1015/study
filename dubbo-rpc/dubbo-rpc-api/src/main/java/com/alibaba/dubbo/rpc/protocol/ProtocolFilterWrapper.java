@@ -48,6 +48,13 @@ public class ProtocolFilterWrapper implements Protocol {
         return protocol.getDefaultPort();
     }
 
+    /**
+     *
+     * @param invoker 服务的执行体
+     * @param <T>
+     * @return
+     * @throws RpcException
+     */
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
         if (Constants.REGISTRY_PROTOCOL.equals(invoker.getUrl().getProtocol())) {
             return protocol.export(invoker);
@@ -66,6 +73,15 @@ public class ProtocolFilterWrapper implements Protocol {
         protocol.destroy();
     }
 
+    /**
+     * 构建调用链，主要是获取到被@Activate注解的、合适的Filter，然后从数组尾部开始包装invoker，
+     * 这样构成一个数组头部过滤链开始执行的整条调用链
+     * @param invoker invoker就是需要被包装的调用
+     * @param key key和group用于获取到被@Activate注解的、合适的Filter
+     * @param group
+     * @param <T>
+     * @return
+     */
     private static <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group) {
         Invoker<T> last = invoker;
         //获取Filter的ExtensionLoader(ExtensionLoader中有ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS)，
@@ -73,6 +89,8 @@ public class ProtocolFilterWrapper implements Protocol {
         List<Filter> filters = ExtensionLoader.getExtensionLoader(Filter.class).getActivateExtension(invoker.getUrl(), key, group);
         /**
          * 过滤链中，filter总在invoker之前调用
+         * 随后filters是从数组尾部开始遍历的，但是invoke中，总是filter.invoke(filter.invoke(next))这样，
+         * 所以加入filters是[a、b、c、d]，那么过滤链的时候就是a->b->c->d这样的执行顺序
          */
         if (filters.size() > 0) {
             for (int i = filters.size() - 1; i >= 0; i --) {

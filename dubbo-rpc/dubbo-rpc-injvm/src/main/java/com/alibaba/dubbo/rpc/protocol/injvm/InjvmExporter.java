@@ -32,6 +32,14 @@ class InjvmExporter<T> extends AbstractExporter<T> {
     
     private final Map<String, Exporter<?>> exporterMap;
 
+    /**
+     * invoker是一个被filter包装的调用链(里面有URL,url里有接口与方法名)，key是group/interface:version,
+     * 把key和当前实例放入到入参的exporterMap中(注意，exporterMap是从InjvmProtocol中传进来的)。
+     * this.exporterMap有this引用,this有exporterMap引用，注意，是引用
+     * @param invoker
+     * @param key
+     * @param exporterMap
+     */
     InjvmExporter(Invoker<T> invoker, String key, Map<String, Exporter<?>> exporterMap){
         super(invoker);
         this.key = key;

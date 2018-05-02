@@ -1195,8 +1195,10 @@ public final class URL implements Serializable {
      * @return group/interface:version
      */
     public String getServiceKey() {
+        //获取<dubbo:service>中的interface
         String inf = getServiceInterface();
         if (inf == null) return null;
+        //URL中用MVCC方式来实现线程安全，所以这里可以用StringBuilder
         StringBuilder buf = new StringBuilder();
         String group = getParameter(Constants.GROUP_KEY);
         if (group != null && group.length() > 0) {

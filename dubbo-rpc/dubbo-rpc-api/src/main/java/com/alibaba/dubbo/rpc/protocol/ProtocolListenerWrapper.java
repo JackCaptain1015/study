@@ -16,6 +16,7 @@
 package com.alibaba.dubbo.rpc.protocol;
 
 import java.util.Collections;
+import java.util.List;
 
 import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.URL;
@@ -53,9 +54,17 @@ public class ProtocolListenerWrapper implements Protocol {
         if (Constants.REGISTRY_PROTOCOL.equals(invoker.getUrl().getProtocol())) {
             return protocol.export(invoker);
         }
-        return new ListenerExporterWrapper<T>(protocol.export(invoker), 
-                Collections.unmodifiableList(ExtensionLoader.getExtensionLoader(ExporterListener.class)
-                        .getActivateExtension(invoker.getUrl(), Constants.EXPORTER_LISTENER_KEY)));
+
+        Exporter invokerTemp = protocol.export(invoker);
+        List<ExporterListener> exporterListeners = Collections.unmodifiableList(ExtensionLoader.getExtensionLoader(ExporterListener.class)
+                .getActivateExtension(invoker.getUrl(), Constants.EXPORTER_LISTENER_KEY));
+        ListenerExporterWrapper<T> tListenerExporterWrapper = new ListenerExporterWrapper<T>(invokerTemp, exporterListeners);
+
+        return tListenerExporterWrapper;
+
+//        return new ListenerExporterWrapper<T>(protocol.export(invoker),
+//                Collections.unmodifiableList(ExtensionLoader.getExtensionLoader(ExporterListener.class)
+//                        .getActivateExtension(invoker.getUrl(), Constants.EXPORTER_LISTENER_KEY)));
     }
 
     public <T> Invoker<T> refer(Class<T> type, URL url) throws RpcException {
