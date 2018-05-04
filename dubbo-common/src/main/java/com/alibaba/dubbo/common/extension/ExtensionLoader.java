@@ -75,7 +75,7 @@ public class ExtensionLoader<T> {
 
     private static final ConcurrentMap<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<Class<?>, Object>();
 
-    // ==============================
+    // ==============================上面是static，下面是实例
 
     private final Class<?> type;
 
@@ -116,7 +116,7 @@ public class ExtensionLoader<T> {
             throw new IllegalArgumentException("Extension type(" + type + 
                     ") is not extension, because WITHOUT @" + SPI.class.getSimpleName() + " Annotation!");
         }
-        
+        //EXTENSION_LOADERS存的是ConcurrentMap<Class<?>, ExtensionLoader<?>>，即传入Compiler.class能得到ExtensionLoader<Compiler>
         ExtensionLoader<T> loader = (ExtensionLoader<T>) EXTENSION_LOADERS.get(type);
         if (loader == null) {
             EXTENSION_LOADERS.putIfAbsent(type, new ExtensionLoader<T>(type));
@@ -458,6 +458,16 @@ public class ExtensionLoader<T> {
         }
     }
 
+    /**
+     * getAdaptiveExtension方法会先去Spi接口中加载相关的类，加载文件的时候，比如在文件中读取到一行
+     * line = com.alibaba.dubbo.common.compiler.support.AdaptiveCompiler
+     * 那么会调用clazz = Class.forName(line, true, classLoader)，然后判断这个clazz的类上是否有@Adaptive注解，
+     * 如果有就赋值给volatile Class<?> cachedAdaptiveClass(注意，如果cachedAdaptiveClass不为null并且又不等于clazz，
+     * 那么会抛出异常(即同一个Compiler有多个被@Adaptive注解在类上的适配类))
+     * 如果SPI接口中找不到有关类(即cachedAdaptiveClass为null)，那么就去动态生成，否则就直接返回cachedAdaptiveClass。
+     * 动态生成主要根据方法上是否有@Adaptive注解，如果所有方法都没有@Adaptive注解，那么会抛出异常
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public T getAdaptiveExtension() {
         Object instance = cachedAdaptiveInstance.get();
@@ -599,7 +609,7 @@ public class ExtensionLoader<T> {
 
     // 此方法已经getExtensionClasses方法同步过。
     private Map<String, Class<?>> loadExtensionClasses() {
-        //获取到SPI注解接口
+        //如果现在在ExtensionLoader<Compiler>中，那么type就是Compiler。获取到SPI注解接口
         final SPI defaultAnnotation = type.getAnnotation(SPI.class);
         if(defaultAnnotation != null) {
             //SPI中注解的value默认为""
@@ -617,6 +627,7 @@ public class ExtensionLoader<T> {
         //加载SPI文件
         Map<String, Class<?>> extensionClasses = new HashMap<String, Class<?>>();
         //加载dubbo的SPI接口文件中的接口，并存入extensionClasses中
+        //加载的fileName为dir + type.getName();
         loadFile(extensionClasses, DUBBO_INTERNAL_DIRECTORY);
         loadFile(extensionClasses, DUBBO_DIRECTORY);
         loadFile(extensionClasses, SERVICES_DIRECTORY);

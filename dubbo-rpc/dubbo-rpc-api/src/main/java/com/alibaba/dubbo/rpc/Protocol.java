@@ -37,13 +37,19 @@ public interface Protocol {
     /**
      * 暴露远程服务：<br>
      * 1. 协议在接收请求时，应记录请求来源方地址信息：RpcContext.getContext().setRemoteAddress();<br>
-     * 2. export()必须是幂等的，也就是暴露同一个URL的Invoker两次，和暴露一次没有区别。<br>
+     * 2. export()必须是幂等的，也就是暴露同一个URL的Invoker两次，和暴露一次没有区别。<br>(这里幂等是通过判断协议来实现的，比如injvm中，如果协议已经是injvm就直接退出)
      * 3. export()传入的Invoker由框架实现并传入，协议不需要关心。<br>
      * 
      * @param <T> 服务的类型
      * @param invoker 服务的执行体
      * @return exporter 暴露服务的引用，用于取消暴露
      * @throws RpcException 当暴露服务出错时抛出，比如端口已占用
+     */
+    /**
+     * @Adaptive注解在方法上，目的是生成动态的Protocol$Adpative类，
+     * 在Protocol$Adpative中，export主要做的是通过protocolName = invoker.getUrl.getProtocol，
+     * 然后去extension = (Protocol)ExtensionLoader.getExtensionLoader(com.alibaba.dubbo.rpc.Protocol.class).getExtension(protocolName);
+     * 通过这种方式去获取未知类(SPI),然后调用extension.export方法
      */
     @Adaptive
     <T> Exporter<T> export(Invoker<T> invoker) throws RpcException;
