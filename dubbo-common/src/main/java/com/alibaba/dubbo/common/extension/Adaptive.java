@@ -25,10 +25,10 @@ import com.alibaba.dubbo.common.URL;
 
 /**
  * 在{@link ExtensionLoader}生成Extension的Adaptive Instance时，为{@link ExtensionLoader}提供信息。
- * 
- * @author ding.lid
- * @export
- * 
+ *
+ * 如果@Adaptive注解在类上，那么调用ExtentionLoaderget.getAdaptiveExtension()时会返回这个类
+ * 如果@Adaptive注解在方法上，那么调用ExtentionLoaderget.getAdaptiveExtension()时会返回这个类的$Adaptive
+ *
  * @see ExtensionLoader
  * @see URL
  */

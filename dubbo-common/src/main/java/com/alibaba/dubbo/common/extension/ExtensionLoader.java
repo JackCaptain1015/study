@@ -309,6 +309,10 @@ public class ExtensionLoader<T> {
     }
 
     /**
+     * 去SPI接口中加载该type类型文件(加载即getExtensionClasses()，type比如ProxyFactory)，
+     * 然后getExtensionClasses().get(name)获取到spi中设置的name对应的接口，如果找不到就报错
+     *
+     *
      * 返回指定名字的扩展。如果指定名字的扩展不存在，则抛异常 {@link IllegalStateException}.
      *
      * @param name
@@ -323,6 +327,9 @@ public class ExtensionLoader<T> {
 		}
 		Holder<Object> holder = cachedInstances.get(name);
 		if (holder == null) {
+            /**
+             * Holder帮助Class来携带一个value
+             */
 		    cachedInstances.putIfAbsent(name, new Holder<Object>());
 		    holder = cachedInstances.get(name);
 		}
@@ -331,6 +338,9 @@ public class ExtensionLoader<T> {
 		    synchronized (holder) {
 	            instance = holder.get();
 	            if (instance == null) {
+                    /**
+                     * 为holder设置value
+                     */
 	                instance = createExtension(name);
 	                holder.set(instance);
 	            }
@@ -686,6 +696,11 @@ public class ExtensionLoader<T> {
                                                 }
                                             } else {
                                                 try {
+                                                    /**
+                                                     * 获取clazz中的type类型入参的构造函数，
+                                                     * 比如StubProxyFactoryWrapper中的public StubProxyFactoryWrapper(ProxyFactory proxyFactory)。
+                                                     * 这里获取构造函数又没用，主要是为了clazz中是否存在这样的构造函数，如果不存在就到异常处理逻辑中去
+                                                     */
                                                     clazz.getConstructor(type);
                                                     Set<Class<?>> wrappers = cachedWrapperClasses;
                                                     if (wrappers == null) {
@@ -694,6 +709,9 @@ public class ExtensionLoader<T> {
                                                     }
                                                     wrappers.add(clazz);
                                                 } catch (NoSuchMethodException e) {
+                                                    /**
+                                                     * 如果clazz不存在有参的构造函数，那么再去获取无参的，如果依旧没有，就直接抛出异常
+                                                     */
                                                     clazz.getConstructor();
                                                     if (name == null || name.length() == 0) {
                                                         name = findAnnotationName(clazz);
