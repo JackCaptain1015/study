@@ -70,7 +70,7 @@ public class ExtensionLoader<T> {
     private static final String DUBBO_INTERNAL_DIRECTORY = DUBBO_DIRECTORY + "internal/";
 
     private static final Pattern NAME_SEPARATOR = Pattern.compile("\\s*[,]+\\s*");
-    
+
     private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<Class<?>, ExtensionLoader<?>>();
 
     private static final ConcurrentMap<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<Class<?>, Object>();
@@ -714,6 +714,13 @@ public class ExtensionLoader<T> {
                                                      * 比如JdkProxyFactory和JavassistProxyFactory
                                                      */
                                                     clazz.getConstructor();
+                                                    /**
+                                                     * 这里name就是spi文件中指定的key，
+                                                     * 如果name为空(即只有value没有key)，根据前面的Class<?> clazz = Class.forName(line, true, classLoader);
+                                                     * 那么clazz其实也是找的到的，那么就去查这个clazz上面注解的@Extension("value")(注意Extension已经被废弃，改用@SPI，
+                                                     * 获取@SPI的逻辑在loadFile之前，如果存在就会把@SPI的value加入到cachedDefaultName中(即key))
+                                                     * 如果clazz上没有@Extension注解，就直接去获取clazz.getSimpleName()
+                                                     */
                                                     if (name == null || name.length() == 0) {
                                                         name = findAnnotationName(clazz);
                                                         if (name == null || name.length() == 0) {
@@ -725,7 +732,13 @@ public class ExtensionLoader<T> {
                                                             }
                                                         }
                                                     }
+                                                    //按,切分name
                                                     String[] names = NAME_SEPARATOR.split(name);
+                                                    /**
+                                                     * 如果clazz被@Activate注解，那就name[0](即第一个key)，activate加到cachedActivates中
+                                                     * 将clazz和name[i]加入到cachedNames中
+                                                     * 将name[i],clazz加入到extensionClasses中(返回)
+                                                     */
                                                     if (names != null && names.length > 0) {
                                                         Activate activate = clazz.getAnnotation(Activate.class);
                                                         if (activate != null) {
