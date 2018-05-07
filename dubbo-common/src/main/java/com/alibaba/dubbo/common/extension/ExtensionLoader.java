@@ -310,11 +310,15 @@ public class ExtensionLoader<T> {
 
     /**
      * 去SPI接口中加载该type类型文件(加载即getExtensionClasses()，type比如ProxyFactory)，
-     * 然后getExtensionClasses().get(name)获取到spi中设置的name对应的接口，如果找不到就报错
-     *
+     * 然后getExtensionClasses().get(name)获取到spi中设置的name对应的clazz，如果找不到就报错。
+     * 得到clazz以后，就可以根据clazz.newInstance()得到clazz对象，然后将clazz和clazz.newInstance()
+     * 加入到EXTENSION_INSTANCES中，并为instance注入属性。
+     * 然后从cachedWrapperClasses中获取所有包装类(判断是否是包装类，即该类中是否有构造函数入参为该接口类型，比如StubProxyFactoryWrapper),
+     * 如果包装类存在，那么遍历Set<Class<?>> wrapperClasses，并执行
+     * instance = injectExtension((T) wrapperClass.getConstructor(type).newInstance(instance));
+     * 然后返回instance.
      *
      * 返回指定名字的扩展。如果指定名字的扩展不存在，则抛异常 {@link IllegalStateException}.
-     *
      * @param name
      * @return
      */
@@ -540,6 +544,9 @@ public class ExtensionLoader<T> {
             throw findException(name);
         }
         try {
+            /**
+             * EXTENSION_INSTANCES中存放clazz与clazz.newInstance()
+             */
             T instance = (T) EXTENSION_INSTANCES.get(clazz);
             if (instance == null) {
                 EXTENSION_INSTANCES.putIfAbsent(clazz, (T) clazz.newInstance());
