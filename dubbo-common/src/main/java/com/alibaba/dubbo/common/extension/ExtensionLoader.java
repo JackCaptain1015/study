@@ -697,7 +697,7 @@ public class ExtensionLoader<T> {
                                             } else {
                                                 try {
                                                     /**
-                                                     * 获取clazz中的type类型入参的构造函数，
+                                                     * 获取clazz中的type类型入参的构造函数(如果有这样的构造函数，说明这个类是个包装类)，
                                                      * 比如StubProxyFactoryWrapper中的public StubProxyFactoryWrapper(ProxyFactory proxyFactory)。
                                                      * 这里获取构造函数又没用，主要是为了clazz中是否存在这样的构造函数，如果不存在就到异常处理逻辑中去
                                                      */
@@ -710,7 +710,8 @@ public class ExtensionLoader<T> {
                                                     wrappers.add(clazz);
                                                 } catch (NoSuchMethodException e) {
                                                     /**
-                                                     * 如果clazz不存在有参的构造函数，那么再去获取无参的，如果依旧没有，就直接抛出异常
+                                                     * 如果clazz不存在有参的构造函数，那么再去获取无参的，如果依旧没有，就直接抛出异常，
+                                                     * 比如JdkProxyFactory和JavassistProxyFactory
                                                      */
                                                     clazz.getConstructor();
                                                     if (name == null || name.length() == 0) {
