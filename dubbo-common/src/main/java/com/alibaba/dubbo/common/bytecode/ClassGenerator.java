@@ -296,10 +296,16 @@ public final class ClassGenerator
 	public Class<?> toClass(ClassLoader loader, ProtectionDomain pd)
 	{
 		if( mCtc != null )
+			//如果CtClass对象已经存在，那么将CtClass对象从ClassPool中移除
 			mCtc.detach();
 		long id = CLASS_NAME_COUNTER.getAndIncrement();
 		try
 		{
+			/**
+			 * ClassPool.get(superClassName)可以得到superClassName的CtClass实例
+			 * 因为ClassPool会再次读取该类文件，重新建立CtClass
+			 * 注意：get是要读取已经存在的Class文件，而makeClass是要生成Class文件(如果存在相同名字的class文件就覆盖)
+			 */
 			CtClass ctcs = mSuperClass == null ? null : mPool.get(mSuperClass);
 			if( mClassName == null )
 				mClassName = ( mSuperClass == null || javassist.Modifier.isPublic(ctcs.getModifiers())
@@ -307,9 +313,15 @@ public final class ClassGenerator
 			mCtc = mPool.makeClass(mClassName);
 			if( mSuperClass != null )
 				mCtc.setSuperclass(ctcs);
+			//为CtClass对象添加DC接口，DC接口是用来识别动态类的标志
 			mCtc.addInterface(mPool.get(DC.class.getName())); // add dynamic class tag.
 			if( mInterfaces != null )
 				for( String cl : mInterfaces ) mCtc.addInterface(mPool.get(cl));
+			/**
+			 * 为CtClass对象添加字段,
+			 * 注意：字段的code必须以分号结尾，并且CtClass.addField时所能添加的字段必须是为这个类所创建的，否则不能添加
+			 * 所以CtField.make时候要传入CtClass对象，即为这个CtClass对象创建CtField对象
+			 */
 			if( mFields != null )
 				for( String code : mFields ) mCtc.addField(CtField.make(code, mCtc));
 			if( mMethods != null )

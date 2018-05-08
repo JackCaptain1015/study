@@ -1,0 +1,65 @@
+
+public class com.alibaba.dubbo.common.bytecode.Wrapper0 extends com.alibaba.dubbo.common.bytecode.Wrapper{
+
+    public static String[] pns = {};
+
+    public static java.util.Map pts = new HashMap<String,Class<?>>();;
+
+    public static String[] mns = {"sayHello"};
+
+    public static String[] dmns = {"sayHello"};
+
+    public static Class[] mts0 = new Class[]{String.class};
+
+
+    public String[] getPropertyNames(){ return pns; }
+
+    public boolean hasProperty(String n){ return pts.containsKey($1); }
+
+    public Class getPropertyType(String n){ return (Class)pts.get($1); }
+
+    public String[] getMethodNames(){ return mns; }
+
+    public String[] getDeclaredMethodNames(){ return dmns; }
+
+    /**
+    * $1、$2……$n 即分别在javassist中代表第一个参数、第二个参数、第n个参数
+    * 注意：javassist中不能直接使用参数，所以这里使用$1/$2来替代参数
+    */
+    public void setPropertyValue(Object o, String n, Object v){
+        com.alibaba.dubbo.demo.DemoService w;
+        try{
+            w = ((com.alibaba.dubbo.demo.DemoService)$1);
+        }catch(Throwable e){
+             throw new IllegalArgumentException(e);
+        }
+        throw new com.alibaba.dubbo.common.bytecode.NoSuchPropertyException("Not found property \""+$2+"\" filed or setter method in class com.alibaba.dubbo.demo.DemoService.");
+    }
+
+    public Object getPropertyValue(Object o, String n){
+        com.alibaba.dubbo.demo.DemoService w;
+        try{
+            w = ((com.alibaba.dubbo.demo.DemoService)$1);
+        }catch(Throwable e){
+            throw new IllegalArgumentException(e);
+        }
+        throw new com.alibaba.dubbo.common.bytecode.NoSuchPropertyException("Not found property \""+$2+"\" filed or setter method in class com.alibaba.dubbo.demo.DemoService.");
+    }
+
+    public Object invokeMethod(Object o, String n, Class[] p, Object[] v) throws java.lang.reflect.InvocationTargetException{
+        com.alibaba.dubbo.demo.DemoService w;
+        try{
+            w = ((com.alibaba.dubbo.demo.DemoService)$1);
+        }catch(Throwable e){
+            throw new IllegalArgumentException(e);
+        }
+        try{
+            if( "sayHello".equals( $2 )  &&  $3.length == 1 ) {
+                return ($w)w.sayHello((java.lang.String)$4[0]);
+            }
+        } catch(Throwable e) {
+            throw new java.lang.reflect.InvocationTargetException(e);
+        }
+        throw new com.alibaba.dubbo.common.bytecode.NoSuchMethodException("Not found method \""+$2+"\" in class com.alibaba.dubbo.demo.DemoService.");
+    }
+}
