@@ -205,6 +205,11 @@ public abstract class Wrapper
 	 */
 	abstract public Object invokeMethod(Object instance, String mn, Class<?>[] types, Object[] args) throws NoSuchMethodException, InvocationTargetException;
 
+	/**
+	 * 这里生成的代码详见Wrapper0.txt，里面的$1等参数还需要被ClassGenerator.toClass方法处理
+	 * @param c
+	 * @return
+	 */
 	private static Wrapper makeWrapper(Class<?> c)
 	{
 		if( c.isPrimitive() )
@@ -322,8 +327,12 @@ public abstract class Wrapper
 		c1.append(" throw new " + NoSuchPropertyException.class.getName() + "(\"Not found property \\\"\"+$2+\"\\\" filed or setter method in class " + c.getName() + ".\"); }");
 		c2.append(" throw new " + NoSuchPropertyException.class.getName() + "(\"Not found property \\\"\"+$2+\"\\\" filed or setter method in class " + c.getName() + ".\"); }");
 
-		// make class
+		// make class 构建一个class
 		long id = WRAPPER_CLASS_COUNTER.getAndIncrement();
+		/**
+		 * 注意，ClassGenerator是自定义的，里面用的javassist处理编码
+		 * 所以代码中的$1、$2之类的，会在ClassGenerator中被javassist处理
+		 */
 		ClassGenerator cc = ClassGenerator.newInstance(cl);
 		cc.setClassName( ( Modifier.isPublic(c.getModifiers()) ? Wrapper.class.getName() : c.getName() + "$sw" ) + id );
 		cc.setSuperClass(Wrapper.class);
@@ -347,6 +356,7 @@ public abstract class Wrapper
 
 		try
 		{
+			//为class中字段设置属性
 			Class<?> wc = cc.toClass();
 			// setup static field.
 			wc.getField("pts").set(null, pts);
