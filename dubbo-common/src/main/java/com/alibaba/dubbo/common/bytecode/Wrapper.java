@@ -77,7 +77,11 @@ public abstract class Wrapper
 	 */
 	public static Wrapper getWrapper(Class<?> c)
     {
-        while( ClassGenerator.isDynamicClass(c) ) // can not wrapper on dynamic class.
+		/**
+		 * 如果是动态类(这里判断是否是动态类，主要看这个c是否有实现ClassGenerator.DC接口)
+		 * 那么就一直得到不是动态类的父类为止
+		 */
+		while( ClassGenerator.isDynamicClass(c) ) // can not wrapper on dynamic class.
             c = c.getSuperclass();
 
         if( c == Object.class )

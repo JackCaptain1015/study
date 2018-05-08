@@ -58,8 +58,10 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
 
     private static final long   serialVersionUID = 3033787999037024738L;
 
+    //这里得到的是Protocol$Adpative
     private static final Protocol protocol = ExtensionLoader.getExtensionLoader(Protocol.class).getAdaptiveExtension();
-    
+
+    //这里得到的是ProxyFactory$Adpative
     private static final ProxyFactory proxyFactory = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getAdaptiveExtension();
 
     private static final Map<String, Integer> RANDOM_PORT_MAP = new HashMap<String, Integer>();
@@ -534,7 +536,16 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                     .setProtocol(Constants.LOCAL_PROTOCOL)
                     .setHost(NetUtils.LOCALHOST)
                     .setPort(0);
-            //ref为<dubbo:service>的代理类,interfaceClass为<dubbo:service>的interface属性
+            /**
+             * ref为<dubbo:service>的代理类,interfaceClass为<dubbo:service>的interface属性。
+             *
+             *  这里proxyFactory是ProxyFactory$Adpative，在proxyFactory.getInvoker时，会在
+             * ProxyFactory$Adpative.getInvoker中调用
+             * ProxyFactory extensionProxyFactory = ExtensionLoader.getExtensionLoader(com.alibaba.dubbo.rpc.ProxyFactory.class).getExtension(extName)
+             * （extName从url.getParameter中取key为proxy的值，取不到则为默认值javassist）,
+             * 因为包装类的存在，所以extensionProxyFactory返回StubProxyFactoryWrapper实例，
+             * 然后由extensionProxyFactory调用getInvoker执行方法体。
+             */
             Exporter<?> exporter = protocol.export(
                     proxyFactory.getInvoker(ref, (Class) interfaceClass, local));
             exporters.add(exporter);
