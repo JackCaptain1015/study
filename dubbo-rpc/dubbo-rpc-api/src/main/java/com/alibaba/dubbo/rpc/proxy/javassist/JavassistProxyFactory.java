@@ -35,8 +35,17 @@ public class JavassistProxyFactory extends AbstractProxyFactory {
         return (T) Proxy.getProxy(interfaces).newInstance(new InvokerInvocationHandler(invoker));
     }
 
+    /**
+     *
+     */
     public <T> Invoker<T> getInvoker(T proxy, Class<T> type, URL url) {
         // TODO Wrapper类不能正确处理带$的类名
+        /**
+         * wrapper中方法主要多了getProperty、setProperty和invokeMethod三个方法.
+         * 并把被包装类的字段名字、字段类型收集起来
+         * 并把声明方法的入参类型、方法的名字收集起来
+         * 以此可以实现通过invokeMethod来调用被包装类的方法或者通过setProperty设置属性等
+         */
         final Wrapper wrapper = Wrapper.getWrapper(proxy.getClass().getName().indexOf('$') < 0 ? proxy.getClass() : type);
         //返回一个AbstractProxyInvoker的实现，实现了doInvoke方法
         return new AbstractProxyInvoker<T>(proxy, type, url) {

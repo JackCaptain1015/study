@@ -1,14 +1,16 @@
 
 public class com.alibaba.dubbo.common.bytecode.Wrapper0 extends com.alibaba.dubbo.common.bytecode.Wrapper{
 
+    // property name array.
     public static String[] pns = {};
-
+    //被包装类的<property name, property types>
     public static java.util.Map pts = new HashMap<String,Class<?>>();;
 
+    //method names.
     public static String[] mns = {"sayHello"};
-
+    //declaring method names.
     public static String[] dmns = {"sayHello"};
-
+    //mts0表示被包装类中方法的入参类型，0表示第一个方法，如果有第二个方法，就有mts1，以此类推
     public static Class[] mts0 = new Class[]{String.class};
 
 
@@ -26,6 +28,10 @@ public class com.alibaba.dubbo.common.bytecode.Wrapper0 extends com.alibaba.dubb
     * $1、$2……$n 即分别在javassist中代表第一个参数、第二个参数、第n个参数
     * 注意：javassist中不能直接使用参数，所以这里使用$1/$2来替代参数
     */
+    /**
+    * 注意：这里的代码是DemoService中的代码，DemoService中没有字段，所以
+    * 任何setPropertyValue和getPropertyValue都直接抛出异常
+    */
     public void setPropertyValue(Object o, String n, Object v){
         com.alibaba.dubbo.demo.DemoService w;
         try{
@@ -33,8 +39,19 @@ public class com.alibaba.dubbo.common.bytecode.Wrapper0 extends com.alibaba.dubb
         }catch(Throwable e){
              throw new IllegalArgumentException(e);
         }
+        /**
+        * 如果DemoService中有field，那么就会有下面这么一个if条件判断
+        * Type就是字段的类型(这里简写，就是展现一个逻辑)
+        */
+        if( $2.equals(fieldName)){
+                w.fieldName = (Type)$3;
+                return;
+        }
+
         throw new com.alibaba.dubbo.common.bytecode.NoSuchPropertyException("Not found property \""+$2+"\" filed or setter method in class com.alibaba.dubbo.demo.DemoService.");
     }
+
+
 
     public Object getPropertyValue(Object o, String n){
         com.alibaba.dubbo.demo.DemoService w;
@@ -43,6 +60,13 @@ public class com.alibaba.dubbo.common.bytecode.Wrapper0 extends com.alibaba.dubb
         }catch(Throwable e){
             throw new IllegalArgumentException(e);
         }
+        /**
+        * 如果DemoService中有field，那么就会有下面这么一个if条件判断
+        */
+        if( $2.equals(fieldName)){
+            return ($w)w.field;
+        }
+
         throw new com.alibaba.dubbo.common.bytecode.NoSuchPropertyException("Not found property \""+$2+"\" filed or setter method in class com.alibaba.dubbo.demo.DemoService.");
     }
 

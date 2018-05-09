@@ -99,7 +99,11 @@ public class StubProxyFactoryWrapper implements ProxyFactory {
         }
         return proxy;
     }
-    
+
+    /**
+     * 当StubProxyFactoryWrapper包装的是JavassistProxyFactory时(即proxyFactory为JavassistProxyFactory)，返回的是
+     * AbstractProxyInvoker{ doInvoke{return wrapper.invokeMethod(proxy, methodName, parameterTypes, arguments)}}
+     */
     public <T> Invoker<T> getInvoker(T proxy, Class<T> type, URL url) throws RpcException {
         return proxyFactory.getInvoker(proxy, type, url);
     }

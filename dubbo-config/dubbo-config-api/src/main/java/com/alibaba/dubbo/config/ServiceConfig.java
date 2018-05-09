@@ -539,12 +539,17 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             /**
              * ref为<dubbo:service>的代理类,interfaceClass为<dubbo:service>的interface属性。
              *
-             *  这里proxyFactory是ProxyFactory$Adpative，在proxyFactory.getInvoker时，会在
+             * 1、这里proxyFactory是ProxyFactory$Adpative，在proxyFactory.getInvoker时，会在
              * ProxyFactory$Adpative.getInvoker中调用
              * ProxyFactory extensionProxyFactory = ExtensionLoader.getExtensionLoader(com.alibaba.dubbo.rpc.ProxyFactory.class).getExtension(extName)
              * （extName从url.getParameter中取key为proxy的值，取不到则为默认值javassist）,
              * 因为包装类的存在，所以extensionProxyFactory返回StubProxyFactoryWrapper实例，
-             * 然后由extensionProxyFactory调用getInvoker执行方法体。
+             * 由于StubProxyFactoryWrapper实际包装的是JavassistProxyFactory所以实际执行getInvoker()时会去调用
+             * JavassistProxyFactory中的getInvoker()方法，得到一个实现了AbstractProxyInvoker实例。
+             * AbstractProxyInvoker实例中的doInvoke方法实际返回的是wrapper.invokeMethod()。
+             * 而wrapper中做的事，其实就是通过反射去调用方法而已(即通过传入实例、方法名、方法参数类型、方法参数值调用方法)
+             *
+             * 2、
              */
             Exporter<?> exporter = protocol.export(
                     proxyFactory.getInvoker(ref, (Class) interfaceClass, local));

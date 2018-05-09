@@ -207,6 +207,7 @@ public abstract class Wrapper
 
 	/**
 	 * 这里生成的代码详见Wrapper0.txt，里面的$1等参数还需要被ClassGenerator.toClass方法处理
+	 * 主要生成一个包装类，里面有setProperty和getProperty、invokeMethod方法
 	 * @param c
 	 * @return
 	 */
