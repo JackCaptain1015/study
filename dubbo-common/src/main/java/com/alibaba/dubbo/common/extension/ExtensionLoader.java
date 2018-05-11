@@ -559,8 +559,8 @@ public class ExtensionLoader<T> {
                     /**
                      *获取到wrapper的构造函数，并把clazz实例对象注入该构造函数中，得到一个wrapper对象。
                      * 然后使用injectExtension()方法为该对象中的set方法设置属性。
+                     * 如果有多个wrapper，那么就多次包装，因为Set是ConcurrentHashSet所以不关心包装的顺序
                      */
-
                     instance = injectExtension((T) wrapperClass.getConstructor(type).newInstance(instance));
                 }
             }

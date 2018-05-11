@@ -58,8 +58,7 @@ public class InjvmProtocol extends AbstractProtocol implements Protocol {
     }
 
     /**
-     * 这里其实就是new一个InjvmExporter，然后在exporterMap中存入
-     * invoker.getUrl().getServiceKey()和new InjvmExporter的实力对象。
+     * InjvmInvoker构造函数中往exporterMap中存入invoker.getUrl().getServiceKey()和new InjvmExporter的实力对象。
      * 由此可以推测出，injvm中做服务暴露的核心即exporterMap。
      * @param invoker 服务的执行体
      */

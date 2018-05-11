@@ -20,6 +20,12 @@ public class Protocol$Adpative implements com.alibaba.dubbo.rpc.Protocol {
 
         if(extName == null) throw new IllegalStateException("Fail to get extension(com.alibaba.dubbo.rpc.Protocol) name from url(" + url.toString() + ") use keys([protocol])");
 
+        /**
+         * 当协议为injvm时，这里得到ProtocolListenerWrapper，包装着ProtocolFilterWrapper，ProtocolFilterWrapper里包装着InjvmProtocol。
+         * InjvmProtocol.export()中其实就是返回new InjvmInvoker<T>(serviceType, url, url.getServiceKey(), exporterMap);
+         * 然后InjvmInvoker构造函数中往exporterMap中存入invoker.getUrl().getServiceKey()和new InjvmExporter的实力对象。
+         * 由此可以推测出，injvm中做服务暴露的核心即exporterMap。
+         */
         com.alibaba.dubbo.rpc.Protocol extension = (com.alibaba.dubbo.rpc.Protocol)ExtensionLoader.getExtensionLoader(com.alibaba.dubbo.rpc.Protocol.class).getExtension(extName);
         return extension.export(arg0);
     }
