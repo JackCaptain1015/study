@@ -120,7 +120,10 @@ public class ConfigUtils {
      */
     private static Pattern VARIABLE_PATTERN = Pattern.compile(
             "\\$\\s*\\{?\\s*([\\._0-9a-zA-Z]+)\\s*\\}?");
-    
+
+    /**
+     * 如果expression是掺杂着$的变量，那么就将按$切分，然后分别为切分出来的key设置value
+     */
 	public static String replaceProperty(String expression, Map<String, String> params) {
 	    //string.indexOf不存在返回-1
         if (expression == null || expression.length() == 0 || expression.indexOf('$') < 0) {
@@ -156,8 +159,8 @@ public class ConfigUtils {
                     String path = System.getProperty(Constants.DUBBO_PROPERTIES_KEY);
                     if (path == null || path.length() == 0) {
                         /**
-                         * getenv是获取系统的环境变更
-                         * getProperties是java系统的属性，比如dubbo-default.properties中的属性
+                         * getenv是获取系统的环境变更，比如JAVA_HOME等
+                         * getProperties是java系统的属性，比如tomcat启动时设置的VM option
                          */
                         path = System.getenv(Constants.DUBBO_PROPERTIES_KEY);
                         if (path == null || path.length() == 0) {
@@ -189,6 +192,7 @@ public class ConfigUtils {
 	
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static String getProperty(String key, String defaultValue) {
+        //System.getProperties是java系统的属性，比如运行tomcat时候设置的VM option
         String value = System.getProperty(key);
         if (value != null && value.length() > 0) {
             return value;
