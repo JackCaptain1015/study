@@ -78,7 +78,8 @@ public abstract class Proxy
 	{
 		if( ics.length > 65535 )
 			throw new IllegalArgumentException("interface limit exceeded");
-		
+
+		// 遍历代理接口，获取接口的全限定名，并以分号分隔连接成字符串
 		StringBuilder sb = new StringBuilder();
 		for(int i=0;i<ics.length;i++)
 		{
@@ -115,6 +116,7 @@ public abstract class Proxy
 		    }
 		}
 
+		// 查找缓存map，如果缓存存在，则获取代理对象直接返回
 		Proxy proxy = null;
 		synchronized( cache )
 		{
@@ -141,6 +143,7 @@ public abstract class Proxy
 			while( true );
 		}
 
+		// AtomicLong自增生成代理类类名后缀id，防止冲突
 		long id = PROXY_CLASS_COUNTER.getAndIncrement();
 		String pkg = null;
 		ClassGenerator ccp = null, ccm = null;
@@ -168,6 +171,18 @@ public abstract class Proxy
 				}
 				ccp.addInterface(ics[i]);
 
+				// 遍历接口中的方法，获取返回类型和参数类型，构建方法体
+				/**
+				 * 方法体如下：handler即InvocationHandler
+				 * public String sayHello(String arg0) {
+				 *     Object[] args = new Object[1];
+				 *     args[0] = arg0;
+				 *
+				 *     Object ret = handler.invoke(this, methods[0], args);
+				 *
+				 *     return (String) ret;
+				 * }
+				 */
 				for( Method method : ics[i].getMethods() )
 				{
 					String desc = ReflectUtils.getDesc(method);
@@ -194,6 +209,7 @@ public abstract class Proxy
 			if( pkg == null )
 				pkg = PACKAGE_NAME;
 
+			// 生成服务接口的代理对象字节码
 			// create ProxyInstance class.
 			String pcn = pkg + ".proxy" + id;
 			ccp.setClassName(pcn);
@@ -204,6 +220,7 @@ public abstract class Proxy
 			Class<?> clazz = ccp.toClass();
 			clazz.getField("methods").set(null, methods.toArray(new Method[0]));
 
+			// 生成Proxy的实现类
 			// create Proxy class.
 			String fcn = Proxy.class.getName() + id;
 			ccm = ClassGenerator.newInstance(cl);

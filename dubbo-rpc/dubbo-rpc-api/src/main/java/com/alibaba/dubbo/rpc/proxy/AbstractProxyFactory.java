@@ -29,6 +29,15 @@ import com.alibaba.dubbo.rpc.service.EchoService;
  */
 public abstract class AbstractProxyFactory implements ProxyFactory {
 
+    /**
+     * 动态代理主要是生成provider jar包里的类，供本地调用不报错
+     * （这个动态代理就是接口在本地的一个代理，然后这个代理会找到服务对应的机器地址。），
+     * 但本地调用以后实际要远程调用，此时依旧会走invocation
+     * @param invoker protocol.refer(DemoService.class, URL.valueOf("dubbo://127.0.0.1:9010/" + DemoService.class.getName()))
+     * @param <T>
+     * @return
+     * @throws RpcException
+     */
     public <T> T getProxy(Invoker<T> invoker) throws RpcException {
         Class<?>[] interfaces = null;
         String config = invoker.getUrl().getParameter("interfaces");
